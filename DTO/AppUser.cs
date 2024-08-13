@@ -18,6 +18,8 @@ namespace TasksManagementServer.DTO
 
         public bool IsManager { get; set; }
 
+        public string ProfileImagePath { get; set; } = "";
+
         public virtual ICollection<UserTask> UserTasks { get; set; } = new List<UserTask>();
 
         public AppUser() { }
