@@ -281,6 +281,30 @@ namespace TasksManagementServer.Controllers
             }
 
         }
+        //Get api/getUrgencyLevels
+        //This method is used to get all urgency levels from the database and return a list of DTO.UrgencyLevel
+        [HttpGet("getUrgencyLevels")]
+        public IActionResult GetUrgencyLevels()
+        {
+            try
+            {
+                List<DTO.UrgencyLevel> dtoLevels = new List<DTO.UrgencyLevel>();
+                List<UrgencyLevel> modelLevels = context.UrgencyLevels.ToList();
+                foreach (UrgencyLevel level in modelLevels)
+                {
+                    dtoLevels.Add(new DTO.UrgencyLevel()
+                    {
+                        UrgencyLevelId = level.UrgencyLevelId,
+                        UrgencyLevelName = level.UrgencyLevelName
+                    });
+                }
+                return Ok(dtoLevels);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPost("UploadProfileImage")]
         public async Task<IActionResult> UploadProfileImageAsync(IFormFile file)
