@@ -75,3 +75,5 @@ values(2, 50, 'Task 50', '2024-12-01', null)
 
 insert into UserTasks (UserId, UrgencyLevelId, TaskDescription, TaskDueDate, TaskActualDate) 
 values(2, 100, 'Task 100', '2024-12-01', '2024-08-15')
+
+

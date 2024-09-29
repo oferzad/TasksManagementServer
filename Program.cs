@@ -53,6 +53,7 @@ namespace TasksManagementServer
             }
             #endregion
             
+            
             #region Add Session
             app.UseSession(); //In order to enable session management
             #endregion 
@@ -60,7 +61,12 @@ namespace TasksManagementServer
             app.UseHttpsRedirection();
             app.UseStaticFiles(); //Support static files delivery from wwwroot folder
             app.MapControllers(); //Map all controllers classes
-            
+
+            // Configure the application to listen on all network interfaces
+            // Also note the changes in launchSettings.json
+            // And you should press "allow" when windows firewall prompte a message after running the server for the first time!
+            //app.Urls.Add("http://*:5110");
+            //app.Urls.Add("https://*:7012");
 
             app.Run();
         }
