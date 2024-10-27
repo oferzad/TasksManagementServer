@@ -57,15 +57,8 @@ namespace TasksManagementServer.Controllers
             {
                 HttpContext.Session.Clear(); //Logout any previous login attempt
 
-                //Get model user class from DB with matching email. 
-                Models.AppUser modelsUser = new AppUser()
-                {
-                    UserName = userDto.UserName,
-                    UserLastName = userDto.UserLastName,
-                    UserEmail = userDto.UserEmail,
-                    UserPassword = userDto.UserPassword,
-                    IsManager = userDto.IsManager
-                };
+                //Create model user class
+                Models.AppUser modelsUser = userDto.GetModels();
 
                 context.AppUsers.Add(modelsUser);
                 context.SaveChanges();
@@ -231,15 +224,7 @@ namespace TasksManagementServer.Controllers
                     return Unauthorized("Non Manager User is trying to update a different user");
                 }
 
-                Models.AppUser appUser = new AppUser()
-                {
-                    Id = userDto.Id,
-                    UserName = userDto.UserName,
-                    UserLastName = userDto.UserLastName,
-                    UserEmail = userDto.UserEmail,
-                    UserPassword = userDto.UserPassword,
-                    IsManager = userDto.IsManager
-                };
+                Models.AppUser appUser = userDto.GetModels();
 
                 context.Entry(appUser).State = EntityState.Modified;
 

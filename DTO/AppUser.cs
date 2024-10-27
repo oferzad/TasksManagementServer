@@ -37,5 +37,20 @@ namespace TasksManagementServer.DTO
                 this.UserTasks.Add(new UserTask(task));
             }
         }
+
+        public Models.AppUser GetModels()
+        {
+            Models.AppUser modelsUser = new Models.AppUser()
+            {
+                Id = this.Id,
+                UserName = this.UserName,
+                UserLastName = this.UserLastName,
+                UserEmail = this.UserEmail,
+                UserPassword = this.UserPassword,
+                IsManager = this.IsManager
+            };
+
+            return modelsUser;
+        }
     }
 }
