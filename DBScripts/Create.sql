@@ -46,8 +46,9 @@ Insert Into UrgencyLevels Values(75, 'Medium')
 Insert Into UrgencyLevels Values(100, 'High')
 Go
 
-Insert Into AppUsers Values('admin', 'admin', 'ofer@gmauil.com', '1234', 1)
+Insert Into AppUsers Values('admin', 'admin', 'ofer2@gmauil.com', '1234', 1)
 Go
+
 
 -- Create a login for the admin user
 CREATE LOGIN [TaskAdminLogin] WITH PASSWORD = 'kukuPassword';
@@ -60,6 +61,11 @@ Go
 -- Add the user to the db_owner role to grant admin privileges
 ALTER ROLE db_owner ADD MEMBER [TaskAdminUser];
 Go
+--so user can restore the DB!
+ALTER SERVER ROLE sysadmin ADD MEMBER [TaskAdminLogin];
+Go
+
+
 
 --EF Code
 /*
@@ -71,9 +77,9 @@ select * from TaskComments
 select * from UserTasks
 
 insert into UserTasks (UserId, UrgencyLevelId, TaskDescription, TaskDueDate, TaskActualDate) 
-values(2, 50, 'Task 50', '2024-12-01', null)
+values(1, 50, 'Task 50', '2024-12-01', null)
 
 insert into UserTasks (UserId, UrgencyLevelId, TaskDescription, TaskDueDate, TaskActualDate) 
-values(2, 100, 'Task 100', '2024-12-01', '2024-08-15')
+values(1, 100, 'Task 100', '2024-12-01', '2024-08-15')
 
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TasksManagementServer.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+using System.Data.SqlClient;
 namespace TasksManagementServer.Controllers
 {
     [Route("api")]
@@ -65,6 +66,34 @@ namespace TasksManagementServer.Controllers
 
                 //User was added!
                 DTO.AppUser dtoUser = new DTO.AppUser(modelsUser);
+                dtoUser.ProfileImagePath = GetProfileImageVirtualPath(dtoUser.Id);
+                return Ok(dtoUser);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        //THis method gets both the user dto object and the profile image and register the user and its image
+        [HttpPost("registerWithImage")]
+        public async Task<IActionResult> RegisterWithImageAsync([FromForm] DTO.AppUser userDto, IFormFile file)
+        {
+            try
+            {
+                HttpContext.Session.Clear(); //Logout any previous login attempt
+
+                //Create model user class
+                Models.AppUser modelsUser = userDto.GetModels();
+
+                context.AppUsers.Add(modelsUser);
+                context.SaveChanges();
+
+                DTO.AppUser dtoUser = new DTO.AppUser(modelsUser);
+
+                //User was added! Now save the file
+                await SaveProfileImageAsync(dtoUser.Id, file);
                 dtoUser.ProfileImagePath = GetProfileImageVirtualPath(dtoUser.Id);
                 return Ok(dtoUser);
             }
@@ -291,6 +320,7 @@ namespace TasksManagementServer.Controllers
             }
         }
 
+        
         [HttpPost("UploadProfileImage")]
         public async Task<IActionResult> UploadProfileImageAsync(IFormFile file)
         {
@@ -358,6 +388,107 @@ namespace TasksManagementServer.Controllers
 
         //Helper functions
 
+        [HttpGet("Backup")]
+        public async Task<IActionResult> Backup()
+        {
+            string path = $"{this.webHostEnvironment.WebRootPath}\\..\\DBScripts\\backup.bak";
+
+            bool success = await BackupDatabaseAsync(path);
+            if (success)
+            {
+                return Ok("Backup was successful");
+            }
+            else
+            {
+                return BadRequest("Backup failed");
+            }
+        }
+
+        [HttpGet("Restore")]
+        public async Task<IActionResult> Restore()
+        {
+            string path = $"{this.webHostEnvironment.WebRootPath}\\..\\DBScripts\\backup.bak";
+
+            bool success = await RestoreDatabaseAsync(path);
+            if (success)
+            {
+                return Ok("Restore was successful");
+            }
+            else
+            {
+                return BadRequest("Restore failed");
+            }
+        }
+        //this function backup the database to a specified path
+        private async Task<bool> BackupDatabaseAsync(string path)
+        {
+            try
+            {
+
+                //Get the connection string
+                string? connectionString = context.Database.GetConnectionString();
+                //Get the database name
+                string databaseName = context.Database.GetDbConnection().Database;
+                //Build the backup command
+                string command = $"BACKUP DATABASE {databaseName} TO DISK = '{path}'";
+                //Create a connection to the database
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    //Open the connection
+                    await connection.OpenAsync();
+                    //Create a command
+                    using (SqlCommand sqlCommand = new SqlCommand(command, connection))
+                    {
+                        //Execute the command
+                        await sqlCommand.ExecuteNonQueryAsync();
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            
+        }
+
+        //THis function restore the database from a backup in a certain path
+        private async Task<bool> RestoreDatabaseAsync(string path)
+        {
+            try
+            {
+                //Get the connection string
+                string? connectionString = context.Database.GetConnectionString();
+                //Get the database name
+                string databaseName = context.Database.GetDbConnection().Database;
+                //Build the restore command
+                string command = $@"
+                USE master;
+                ALTER DATABASE {databaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                RESTORE DATABASE {databaseName} FROM DISK = '{path}' WITH REPLACE;
+                ALTER DATABASE {databaseName} SET MULTI_USER;";
+
+                //Create a connection to the database
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    //Open the connection
+                    await connection.OpenAsync();
+                    //Create a command
+                    using (SqlCommand sqlCommand = new SqlCommand(command, connection))
+                    {
+                        //Execute the command
+                        await sqlCommand.ExecuteNonQueryAsync();
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            
+        }
+
         //this function gets a file stream and check if it is an image
         private static bool IsImage(Stream stream)
         {
@@ -410,6 +541,55 @@ namespace TasksManagementServer.Controllers
             }
             
             return virtualPath;
+        }
+
+        //THis function gets a userId and a profile image file and save the image in the server
+        //The function return the full path of the file saved
+        private async Task<string> SaveProfileImageAsync(int userId, IFormFile file)
+        {
+            //Read all files sent
+            long imagesSize = 0;
+
+            if (file.Length > 0)
+            {
+                //Check the file extention!
+                string[] allowedExtentions = { ".png", ".jpg" };
+                string extention = "";
+                if (file.FileName.LastIndexOf(".") > 0)
+                {
+                    extention = file.FileName.Substring(file.FileName.LastIndexOf(".")).ToLower();
+                }
+                if (!allowedExtentions.Where(e => e == extention).Any())
+                {
+                    //Extention is not supported
+                    throw new Exception("File sent with non supported extention");
+                }
+
+                //Build path in the web root (better to a specific folder under the web root
+                string filePath = $"{this.webHostEnvironment.WebRootPath}\\profileImages\\{userId}{extention}";
+
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await file.CopyToAsync(stream);
+
+                    if (IsImage(stream))
+                    {
+                        imagesSize += stream.Length;
+                    }
+                    else
+                    {
+                        //Delete the file if it is not supported!
+                        System.IO.File.Delete(filePath);
+                        throw new Exception("File sent is not an image");
+                    }
+
+                }
+
+                return filePath;
+
+            }
+
+            throw new Exception("File in size 0");
         }
     }
 }
