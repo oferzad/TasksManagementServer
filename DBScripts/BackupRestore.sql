@@ -1,4 +1,6 @@
-﻿Use master
+﻿-- REPLACE YOUR DATABASE LOGIN AND PASSWORD IN THE SCRIPT BELOW
+
+Use master
 Go
 
 -- Create a login for the admin user

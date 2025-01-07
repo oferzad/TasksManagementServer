@@ -387,7 +387,7 @@ namespace TasksManagementServer.Controllers
         }
 
         //Helper functions
-
+        #region Backup / Restore
         [HttpGet("Backup")]
         public async Task<IActionResult> Backup()
         {
@@ -488,6 +488,7 @@ namespace TasksManagementServer.Controllers
             }
             
         }
+        #endregion
 
         //this function gets a file stream and check if it is an image
         private static bool IsImage(Stream stream)
