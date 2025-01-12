@@ -49,6 +49,8 @@ Go
 Insert Into AppUsers Values('admin', 'admin', 'ofer2@gmauil.com', '1234', 1)
 Go
 
+Insert Into AppUsers Values('admin', 'admin', 'ofer@gmail.com', '1234', 1)
+Go
 
 -- Create a login for the admin user
 CREATE LOGIN [TaskAdminLogin] WITH PASSWORD = 'kukuPassword';
