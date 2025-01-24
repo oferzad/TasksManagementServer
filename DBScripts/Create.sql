@@ -52,6 +52,10 @@ Go
 Insert Into AppUsers Values('admin', 'admin', 'ofer@gmail.com', '1234', 1)
 Go
 
+--Insert Into AppUsers Values('admin', 'admin', 'shani@gmail.com', '1234', 1)
+--Go
+
+
 -- Create a login for the admin user
 CREATE LOGIN [TaskAdminLogin] WITH PASSWORD = 'kukuPassword';
 Go
@@ -75,6 +79,8 @@ scaffold-DbContext "Server = (localdb)\MSSQLLocalDB;Initial Catalog=TasksManagem
 */
 
 select * from AppUsers
+
+
 select * from TaskComments
 select * from UserTasks
 

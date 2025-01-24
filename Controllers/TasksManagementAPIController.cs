@@ -463,9 +463,21 @@ namespace TasksManagementServer.Controllers
                 string databaseName = context.Database.GetDbConnection().Database;
                 //Build the restore command
                 string command = $@"
-                USE master;
+               USE master;
+               DECLARE @latestBackupSet INT;
+               SELECT TOP 1 @latestBackupSet = position
+               FROM msdb.dbo.backupset
+               WHERE database_name = '{databaseName}'
+               AND backup_set_id IN (
+                     SELECT backup_set_id
+                     FROM msdb.dbo.backupmediafamily
+                     WHERE physical_device_name = '{path}'
+                 )
+               ORDER BY backup_start_date DESC;
                 ALTER DATABASE {databaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-                RESTORE DATABASE {databaseName} FROM DISK = '{path}' WITH REPLACE;
+                RESTORE DATABASE {databaseName} FROM DISK = '{path}' 
+                WITH FILE=@latestBackupSet,
+                REPLACE;
                 ALTER DATABASE {databaseName} SET MULTI_USER;";
 
                 //Create a connection to the database

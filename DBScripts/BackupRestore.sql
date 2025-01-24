@@ -1,4 +1,4 @@
-﻿-- REPLACE YOUR DATABASE LOGIN AND PASSWORD IN THE SCRIPT BELOW
+﻿-- REPLACE YOUR DATABASE NAME, LOGIN AND PASSWORD IN THE SCRIPT BELOW
 
 Use master
 Go
@@ -9,4 +9,7 @@ Go
 
 --so user can restore the DB!
 ALTER SERVER ROLE sysadmin ADD MEMBER [TaskAdminLogin];
+Go
+
+CREATE Database [TasksManagementDB];
 Go
