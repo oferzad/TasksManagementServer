@@ -392,7 +392,14 @@ namespace TasksManagementServer.Controllers
         public async Task<IActionResult> Backup()
         {
             string path = $"{this.webHostEnvironment.WebRootPath}\\..\\DBScripts\\backup.bak";
-
+            try
+            {
+                System.IO.File.Delete(path);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             bool success = await BackupDatabaseAsync(path);
             if (success)
             {
